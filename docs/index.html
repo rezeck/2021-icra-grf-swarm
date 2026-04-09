@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flocking–Segregative Swarming with Gibbs Random Fields — IEEE ICRA 2021</title>
+  <meta name="description" content="Decentralized heterogeneous swarm segregation using Gibbs Random Fields and Metropolis–Hastings sampling (IEEE ICRA 2021).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <div class="icra-topbar">
+    <div class="icra-topbar__brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="4" fill="rgba(255,255,255,0.12)"/>
+        <path fill="#fff" d="M8 10h4v12H8V10zm6 0h4l4 8V10h4v12h-4l-4-8v8h-4V10z"/>
+      </svg>
+      <span>IEEE ICRA 2021 · Supplementary page</span>
+    </div>
+    <div class="icra-topbar__meta">
+      <a href="https://www.ieee-icra.org/">ieee-icra.org</a>
+      ·
+      <a href="https://www.ieee-ras.org/">IEEE Robotics &amp; Automation Society</a>
+    </div>
+  </div>
+  <div class="conf-ribbon" role="presentation" aria-hidden="true"></div>
+
+  <header class="hero-wrap">
+    <div class="hero-card">
+      <div class="hero-card__inner">
+        <div class="hero-year" title="Conference year">2021</div>
+        <div class="hero-body">
+          <p class="badge">IEEE International Conference on Robotics and Automation</p>
+          <h1>Flocking–Segregative Swarming Behaviors using Gibbs Random Fields</h1>
+          <p class="subtitle">
+            Decentralized coordination of large heterogeneous swarms under local sensing, formulated as sampling from a
+            Gibbs random field over feasible velocities. Stochastic updates mitigate poor local minima that often impair
+            gradient-based segregation strategies.
+          </p>
+          <p class="conf-venue">
+            <strong>30 May – 5 June 2021</strong> · Xi’an, China ·
+            <a href="https://ewh.ieee.org/soc/ras/conf/fullysponsored/icra/icra2021/icra2021/">Conference site (archive)</a>
+          </p>
+          <p class="meta">
+            <strong>Paulo Rezeck</strong>, <strong>Renato M. Assunção</strong>, <strong>Luiz Chaimowicz</strong>
+            · VeRLab, Universidade Federal de Minas Gerais (UFMG)
+          </p>
+          <p class="actions">
+            <a class="btn btn-primary" href="https://github.com/verlab/2021-icra-grf-swarm">Source code</a>
+            <a class="btn" href="https://github.com/verlab/2021-icra-grf-swarm/raw/main/paper/_ICRA2021__Flocking_Segregative_Swarming_Behaviors_using_Gibbs_Random_Fields.pdf">Paper (PDF)</a>
+            <a class="btn" href="#cite">BibTeX</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="toc" aria-label="Page contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#summary">Summary</a></li>
+        <li><a href="#video">Video</a></li>
+        <li><a href="#tutorial">Usage tutorial</a></li>
+        <li><a href="#docker">Docker environment</a></li>
+        <li><a href="#parameters">Parameters and implementation notes</a></li>
+        <li><a href="#benchmarks">Related work and bundled baselines</a></li>
+        <li><a href="#replication">Replication protocol for fair comparison</a></li>
+        <li><a href="#cite">Citation</a></li>
+      </ol>
+    </nav>
+
+    <section id="summary">
+      <h2>Summary</h2>
+      <p>
+        This work addresses <em>heterogeneous swarm segregation</em>: agents belong to distinct groups and must
+        form spatially coherent clusters with conspecifics while avoiding inter-group entanglement, using only
+        information available within a finite sensing range. The proposed controller assigns each agent a
+        probabilistic policy by defining an energy-based model over candidate velocity vectors and drawing
+        updates via <em>Metropolis–Hastings</em> sampling, in contrast to deterministic gradient steps on smooth
+        potentials.
+      </p>
+      <p>
+        The accompanying software implements the GRF-based method together with several published baselines under
+        a shared simulation harness (identical world generation, sensing, and logging hooks), enabling controlled
+        empirical comparison. All methods are launched as ROS Melodic packages and execute multi-agent updates
+        in a two-dimensional workspace with visualization suitable for qualitative inspection and quantitative
+        logging of summary statistics across iterations.
+      </p>
+    </section>
+
+    <section id="video">
+      <h2>Video</h2>
+      <p>
+        The following recording illustrates the behavior of the proposed approach in the experimental setting
+        described in the manuscript.
+      </p>
+      <div class="video-frame">
+        <iframe
+          src="https://www.youtube.com/embed/KooNGIStWlM"
+          title="ICRA 2021: Flocking–Segregative Swarming with Gibbs Random Fields"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+      <p class="footnote">
+        Direct link: <a href="https://youtu.be/KooNGIStWlM">https://youtu.be/KooNGIStWlM</a>
+      </p>
+    </section>
+
+    <section id="tutorial">
+      <h2>Usage tutorial</h2>
+
+      <h3>Prerequisites</h3>
+      <p>
+        The repository targets <strong>ROS Melodic</strong> on Ubuntu 18.04. System packages required by the
+        workspace include a C++11 toolchain, <code>catkin</code>, <code>OpenCV</code>, <code>Boost</code>,
+        <code>OpenMP</code>, and Python 3 with <code>numpy</code> for world generation scripts.
+      </p>
+
+      <h3>Installation</h3>
+      <p>Clone into the <code>src</code> tree of a Catkin workspace and build:</p>
+      <pre><code>cd ~/catkin_ws/src
+git clone https://github.com/verlab/2021-icra-grf-swarm.git
+cd ~/catkin_ws
+source /opt/ros/melodic/setup.bash
+catkin_make
+source devel/setup.bash</code></pre>
+
+      <h3>Running the proposed method</h3>
+      <p>
+        The primary executable is exposed as <code>grf_swarm_node</code>. The standard entry point is the launch
+        file below; it generates an initial configuration and runs the simulation for a fixed horizon.
+      </p>
+      <pre><code>roslaunch grf_swarm grf_swarm.launch</code></pre>
+      <p>
+        For scenarios that use the navigation-oriented binary (<code>grf_swarm_nav</code>), use
+        <code>grf_swarm_analysis.launch</code>, which starts the <code>grf_swarm_nav</code> node with the same
+        parameter surface as the main experiment.
+      </p>
+      <pre><code>roslaunch grf_swarm grf_swarm_analysis.launch</code></pre>
+
+      <h3>Logging</h3>
+      <p>
+        Set <code>log:=true</code> (default in the provided launch files) to emit a text log of the cluster-count
+        metric each iteration. Disable the graphical window on headless systems with <code>gui:=false</code>.
+      </p>
+    </section>
+
+    <section id="docker">
+      <h2>Docker environment</h2>
+      <p>
+        A container image based on <code>osrf/ros:melodic-desktop-full</code> builds all five Catkin packages and
+        provides a reproducible runtime without a local ROS installation. The default command runs the GRF swarm
+        launch file with the GUI disabled, which is appropriate for servers and automated runs.
+      </p>
+      <pre><code>docker build -t icra2021-grf-swarm /path/to/2021-icra-grf-swarm
+docker run --rm icra2021-grf-swarm</code></pre>
+      <p>
+        For interactive visualization on Linux hosts with X11, allow local connections and use the Compose
+        profile <code>gui</code> (see <code>docker-compose.yml</code> in the repository):
+      </p>
+      <pre><code>xhost +local:docker
+docker compose --profile gui up grf-gui</code></pre>
+      <p class="footnote">
+        The image is sizable owing to the full desktop ROS dependency stack; it trades disk footprint for a
+        self-contained build of OpenCV, Catkin, and visualization-related packages used across baselines.
+      </p>
+    </section>
+
+    <section id="parameters">
+      <h2>Parameters and implementation notes</h2>
+      <p>
+        The launch files for <code>grf_swarm</code> and the bundled baselines expose a common set of
+        <em>experiment-level</em> arguments. Additional dynamical constants are fixed in the C++ controller
+        implementation (see table below).
+      </p>
+
+      <h3>Launch arguments (shared pattern)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Argument</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>robots</code></td>
+            <td>150</td>
+            <td>Total number of agents in the simulation.</td>
+          </tr>
+          <tr>
+            <td><code>groups</code></td>
+            <td>10</td>
+            <td>Number of heterogeneous groups; agents are assigned types in order of equal-sized partitions.</td>
+          </tr>
+          <tr>
+            <td><code>world</code></td>
+            <td>5</td>
+            <td>Extent of the square workspace (world size parameter passed to the generator and controller as <code>worldsize</code>).</td>
+          </tr>
+          <tr>
+            <td><code>sensing</code></td>
+            <td>1.5</td>
+            <td>Neighborhood radius for pairwise interactions and obstacle sampling relative to each agent.</td>
+          </tr>
+          <tr>
+            <td><code>seed</code></td>
+            <td>1</td>
+            <td>Random seed for the Python world generator; use the same seed across methods for paired trials.</td>
+          </tr>
+          <tr>
+            <td><code>log</code></td>
+            <td>true</td>
+            <td>Enable per-iteration logging of the cluster metric to a plain-text file in the working directory.</td>
+          </tr>
+          <tr>
+            <td><code>gui</code></td>
+            <td>true</td>
+            <td>Open an OpenCV window for real-time visualization when supported.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The launch file sets <code>iterations</code> to <strong>20000</strong> simulation steps unless modified
+        in the XML. The private namespace parameter <code>swarmconf</code> invokes
+        <code>grf_swarm/world/generator.py</code>, which prints one line per robot: position, initial velocity
+        components, and discrete type index, consumed by the node at startup.
+      </p>
+
+      <h3>Controller constants (<code>grf_swarm</code> node)</h3>
+      <p>
+        The following quantities are read from ROS parameters where indicated; others are compiled into the
+        controller: integration step <code>dt = 0.02</code>, velocity cap <code>vmax = 1.0</code>, inertial
+        scaling <code>mass = 0.3</code>, and clearance <code>safezone = 0.3</code>. Optional compile-time flags
+        in <code>grf_swarm.h</code> control obstacle drawing, velocity glyphs, noise injection, and auxiliary
+        logging features for development.
+      </p>
+    </section>
+
+    <section id="benchmarks">
+      <h2>Related work and bundled baselines</h2>
+      <p>
+        The repository includes reimplementations or ports of several methods from the swarm segregation
+        literature, invoked through parallel launch files so that experimental conditions remain aligned.
+      </p>
+
+      <h3>Gradient-based potential (local minima illustration)</h3>
+      <pre><code>roslaunch grad_swarm grad_swarm.launch</code></pre>
+      <p class="cite">
+        Deterministic gradient descent on a smooth potential; useful to illustrate stagnation in unfavorable
+        configurations relative to stochastic sampling.
+      </p>
+
+      <h3>Particle swarm optimization (Inácio et al., 2019)</h3>
+      <p class="cite">
+        Inácio, F. R., Macharet, D. G., &amp; Chaimowicz, L. (2019). PSO-based strategy for the segregation of
+        heterogeneous robotic swarms. <em>Journal of Computational Science</em>, 31, 86–94.
+      </p>
+      <pre><code>roslaunch pso_swarm pso_swarm.launch</code></pre>
+
+      <h3>Minimalistic segregation (Mitrano et al., 2019)</h3>
+      <p class="cite">
+        Mitrano, P., Burklund, J., Giancola, M., &amp; Pinciroli, C. (2019). A minimalistic approach to segregation
+        in robot swarms. <em>2019 International Symposium on Multi-Robot and Multi-Agent Systems (MRS)</em>,
+        105–111. IEEE.
+      </p>
+      <pre><code>roslaunch min_swarm min_swarm.launch</code></pre>
+
+      <h3>Differential potentials with global position knowledge (Santos et al., 2020)</h3>
+      <p class="cite">
+        Santos, V. G., Pires, A. G., Alitappeh, R. J., Rezeck, P. A., Pimenta, L. C., Macharet, D. G., &amp;
+        Chaimowicz, L. (2020). Spatial segregative behaviors in robotic swarms using differential potentials.
+        <em>Swarm Intelligence</em>, 1–26. (Used here as a strong baseline that assumes global positional
+        information.)
+      </p>
+      <pre><code>roslaunch vgs_swarm vgs_swarm.launch</code></pre>
+    </section>
+
+    <section id="replication">
+      <h2>Replication protocol for fair comparison</h2>
+      <p>
+        To compare the proposed GRF controller against any bundled baseline under matched conditions, we recommend
+        the following protocol.
+      </p>
+      <ol>
+        <li>
+          <strong>Fix the random seed.</strong> Pass identical <code>seed:=S</code> values to every launch file so
+          that <code>generator.py</code> reproduces the same initial positions, velocities, and group labels.
+        </li>
+        <li>
+          <strong>Match swarm and environment metadata.</strong> Use the same <code>robots</code>,
+          <code>groups</code>, <code>world</code>, and <code>sensing</code> arguments across runs. These arguments
+          fully specify the synthetic scenario together with the seed.
+        </li>
+        <li>
+          <strong>Align horizon.</strong> Keep <code>iterations</code> at the same value (default 20000) unless the
+          research question explicitly requires a different horizon for all methods.
+        </li>
+        <li>
+          <strong>Enable logging.</strong> Set <code>log:=true</code> and retain the emitted files. The GRF node
+          writes the instantaneous cluster-count metric each cycle when logging is enabled, supporting
+          time-series comparison across algorithms.
+        </li>
+        <li>
+          <strong>Separate qualitative and quantitative runs.</strong> Use <code>gui:=false</code> for batch
+          replication on clusters; enable the GUI only for visualization or debugging.
+        </li>
+        <li>
+          <strong>Container parity.</strong> When using Docker, build a single image and execute each method with
+          the same image ID and host configuration to exclude toolchain drift.
+        </li>
+      </ol>
+      <p>
+        Adhering to this checklist isolates algorithmic differences from initialization and simulator
+        configuration effects, which is essential when reporting comparative performance in scientific
+        publications or supplementary material.
+      </p>
+    </section>
+
+    <section id="cite">
+      <h2>Citation</h2>
+      <p>If this work or software contributes to your research, please cite:</p>
+      <pre><code>@inproceedings{rezeck2021flocking,
+  title={Flocking-Segregative Swarming Behaviors using {Gibbs} Random Fields},
+  author={Rezeck, Paulo and Assun{\c{c}}{\~a}o, Renato M. and Chaimowicz, Luiz},
+  booktitle={2021 IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2021},
+  organization={IEEE}
+}</code></pre>
+    </section>
+
+    <footer class="site-footer">
+      <p>
+        Unofficial supplementary page for the open-source release associated with the ICRA 2021 publication.
+        The IEEE ICRA series is described at <a href="https://www.ieee-icra.org/">ieee-icra.org</a>.
+        Repository: <a href="https://github.com/verlab/2021-icra-grf-swarm">github.com/verlab/2021-icra-grf-swarm</a>.
+      </p>
+    </footer>
+  </main>
+</body>
+</html>
