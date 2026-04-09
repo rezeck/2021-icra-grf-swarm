@@ -1,0 +1,28 @@
+# Optional: run with GUI on Linux (X11)
+#   xhost +local:docker
+#   docker compose --profile gui up
+#
+# Headless (default profile):
+#   docker compose run --rm grf-demo
+
+services:
+  grf-demo:
+    build: .
+    image: icra2021-grf-swarm:local
+    network_mode: host
+    environment:
+      - ROS_HOSTNAME=localhost
+    # Override example:
+    # command: ["bash", "-lc", "source /opt/ros/melodic/setup.bash && source /catkin_ws/devel/setup.bash && roslaunch grf_swarm grf_swarm.launch robots:=150 groups:=10 seed:=1 gui:=false"]
+
+  grf-gui:
+    profiles: ["gui"]
+    build: .
+    image: icra2021-grf-swarm:local
+    network_mode: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - ROS_HOSTNAME=localhost
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: ["bash", "-lc", "source /opt/ros/melodic/setup.bash && source /catkin_ws/devel/setup.bash && roslaunch grf_swarm grf_swarm.launch gui:=true"]
