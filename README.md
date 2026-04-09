@@ -2,7 +2,7 @@
 
 Implementation of a decentralized coordination of autonomous swarms using Gibbs Random Field and Metropolis-Hastings sampling toward heterogeneous swarm segregation.
 
-**Project page (GitHub Pages):** enable Pages from the `/docs` folder on the `main` branch, then open `https://<user-or-org>.github.io/2021-icra-grf-swarm/`.
+**Project page (GitHub Pages):** enable Pages from the `/docs` folder on the `main` branch, then open `https://verlab.github.io/2021-icra-grf-swarm/`.
 
 ## Cite this work
 ```
